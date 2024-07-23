@@ -29,3 +29,7 @@ end
 if minetest.get_modpath("moretrees") then
     dofile(path .. "/mod_support/moretrees.lua")
 end
+
+if minetest.get_modpath("asuna_core") then
+    dofile(path .. "/mod_support/asuna.lua")
+end

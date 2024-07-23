@@ -1,4 +1,6 @@
-local items = {
+local items = {}
+
+for _,item in ipairs({
     {"farming:seed_wheat", 4},
     {"farming:tomato", 2},
     {"farming:rye", 4},
@@ -33,6 +35,10 @@ local items = {
     {"farming:beans", 8},
     {"farming:seed_barley", 4},
     {"farming:barley", 8},
-}
+}) do
+    if minetest.registered_items[item[1]] then
+        table.insert(items,item)
+    end
+end
 
 lootchests.add_to_loot_table("lootchests_default:basket", items)

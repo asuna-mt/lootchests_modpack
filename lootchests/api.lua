@@ -2,6 +2,8 @@ lootchests = {}
 
 lootchests.loot_table = {}
 
+lootchests.spawn_chests = minetest.settings:get_bool("asuna.loot_chests", true)
+
 local debug = minetest.settings:get("lootchests_debug") or false
 
 local function list_length(list)
@@ -20,6 +22,13 @@ lootchests.add_to_loot_table = function(key, add)
         table.insert(lootchests.loot_table[key], v)
     end
 end
+
+local water_nodes = {
+    "default:water_source",
+    "default:river_water_source",
+    "default:lava_source",
+    "ethereal:quicksand2",
+}
 
 lootchests.register_lootchest = function(def)
 
@@ -101,24 +110,54 @@ lootchests.register_lootchest = function(def)
         end,
     })
 
-    if not debug then
+    -- Function for checking underwater
+    local check_water
+    if not def.underwater then
+        check_water = function(pos)
+            for _,waterpos in ipairs({
+                { x = pos.x - 1, y = pos.y, z = pos.z - 1 },
+                { x = pos.x + 1, y = pos.y, z = pos.z - 1 },
+                { x = pos.x - 1, y = pos.y, z = pos.z + 1 },
+                { x = pos.x + 1, y = pos.y, z = pos.z + 1 },
+            }) do
+                for _,water_node in ipairs(water_nodes) do
+                    if minetest.get_node(waterpos).name == water_node then
+                        return true -- found nearby water, trigger check
+                    end
+                end
+            end
+            return false -- did not find nearby water, do not trigger check
+        end
+    else
+        check_water = function()
+            return false -- check never triggers
+        end
+    end
+
+    if not debug and lootchests.spawn_chests then
         minetest.register_lbm({
             label = "Upgrade " .. def.description,
             name = def.name .. "_marker_replace",
             nodenames = def.name .. "_marker",
             run_at_every_load = true,
             action = function(pos, node)
-                minetest.set_node(pos, {name = def.name, param2 = minetest.get_node(pos).param2})
+                if check_water(pos) then
+                    minetest.set_node(pos, {name = "default:water_source", param2 = 0})
+                    return -- loot chest is underwater and should not be, do not place here
+                else
+                    minetest.set_node(pos, {name = def.name, param2 = 0})
+                end
                 local rand = PcgRandom(pos.x * pos.y * pos.z)
                 local inv = minetest.get_inventory({type = "node", pos = pos})
                 for i = 1, slots do
                     if rand:next(0,100) <= slot_spawn_chance then
                         local item_def = lootchests.loot_table[def.name][rand:next(1, #lootchests.loot_table[def.name])]
-                        local stack = ItemStack(item_def[1])
-                        if minetest.registered_tools[item_def[1]] then
+                        local item_name = item_def[#item_def < 3 and 1 or rand:next(1,#item_def - 1)]
+                        local stack = ItemStack(item_name)
+                        if minetest.registered_tools[item_name] then
                             stack:set_wear(rand:next(1,65535))
                         else
-                            stack:set_count(rand:next(1, item_def[2]))
+                            stack:set_count(rand:next(1, item_def[#item_def]))
                         end
                         inv:set_stack("main", i, stack)
                     end
@@ -127,7 +166,7 @@ lootchests.register_lootchest = function(def)
         })
     end
 
-    if def.spawn_in then
+    if def.spawn_in and lootchests.spawn_chests then
         minetest.register_ore({
             ore_type = "scatter",
             ore = def.name .. "_marker",
@@ -140,11 +179,13 @@ lootchests.register_lootchest = function(def)
         })
     end
 
-    if def.spawn_on then
+    if def.spawn_on and lootchests.spawn_chests then
         minetest.register_decoration({
             deco_type = "simple",
             place_on = def.spawn_on,
-            sidelen = 16,
+            spawn_by = def.spawn_by,
+            num_spawn_by = def.num_spawn_by,
+            sidelen = 80,
             fill_ratio = 1/fill_ratio,
             y_min = ymin,
             y_max = ymax,
