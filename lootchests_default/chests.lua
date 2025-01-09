@@ -1,6 +1,8 @@
+local S = minetest.get_translator(minetest.get_current_modname())
+
 lootchests.register_lootchest({
     name = "lootchests_default:ocean_chest",
-    description = "Ocean Chest",
+    description = S("Ocean Chest"),
     spawn_in = {"default:sand", "default:desert_sand", "default:silver_sand"},
     spawn_on = {"default:sand"},
     underwater = true,
@@ -120,7 +122,7 @@ local chest_spawning = {
 
 lootchests.register_lootchest({
     name = "lootchests_default:basket",
-    description = "Basket",
+    description = S("Basket"),
     tiles = {
         "lootchests_default_basket_top.png",
         "lootchests_default_basket_top.png",
@@ -140,7 +142,7 @@ lootchests.register_lootchest({
 
 lootchests.register_lootchest({
     name = "lootchests_default:urn",
-    description = "Urn",
+    description = S("Urn"),
     tiles = {
         "lootchests_default_urn_top.png",
         "lootchests_default_urn_top.png",
@@ -160,7 +162,7 @@ lootchests.register_lootchest({
 
 lootchests.register_lootchest({
     name = "lootchests_default:barrel",
-    description = "Barrel",
+    description = S("Barrel"),
     tiles = {
         "lootchests_default_barrel_top.png",
         "lootchests_default_barrel_top.png",
@@ -178,7 +180,7 @@ lootchests.register_lootchest({
 
 lootchests.register_lootchest({
     name = "lootchests_default:stone_chest",
-    description = "Ancient Chest",
+    description = S("Ancient Chest"),
     tiles = {
         "lootchests_default_stone_chest_top.png",
         "lootchests_default_stone_chest_top.png",
@@ -199,5 +201,3 @@ lootchests.register_lootchest({
     slot_spawn_chance = 55,
     slots = 32,
 })
-
-
