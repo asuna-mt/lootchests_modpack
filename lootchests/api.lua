@@ -2,7 +2,7 @@ lootchests = {}
 
 lootchests.loot_table = {}
 
-lootchests.spawn_chests = minetest.settings:get_bool("asuna.loot_chests", true)
+lootchests.spawn_chests = asuna.content.wayfarer.loot_chests
 local S = minetest.get_translator(minetest.get_current_modname())
 
 local debug = minetest.settings:get("lootchests_debug") or false
